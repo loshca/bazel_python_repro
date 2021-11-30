@@ -1,0 +1,40 @@
+load("@rules_python//python:defs.bzl", "py_runtime_pair")
+
+py_runtime(
+    name = "python3_runtime",
+    files = ["@portable_python//:files"],
+    interpreter = "@portable_python//:python.exe",
+    python_version = "PY3",
+    visibility = ["//visibility:public"],
+)
+
+py_runtime_pair(
+    name = "py_runtime",
+    py2_runtime = None,
+    py3_runtime = ":python3_runtime",
+)
+
+toolchain(
+    name = "py_toolchain",
+    toolchain = ":py_runtime",
+    toolchain_type = "@bazel_tools//tools/python:toolchain_type",
+)
+
+# ========================================================================
+load(":my_python_rule.bzl", "my_python_rule")
+
+py_binary(
+    name = "tool",
+    srcs = ["src/tool.py"]
+)
+
+my_python_rule(
+    name = "generate_smth"
+)
+
+genrule(
+    name = "generate_smth2",
+    outs = ["out.txt"],
+    cmd_bat = ".\\$(location tool) > $@",
+    exec_tools = [":tool"]
+)
